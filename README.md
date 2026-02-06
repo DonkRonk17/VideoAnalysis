@@ -1,3 +1,5 @@
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/e7f41c73-be57-4a67-bbfb-81ba0f74e7ac" />
+
 # VideoAnalysis
 
 **Enable AI Agents to "Watch" and Analyze Video Content**
@@ -566,6 +568,9 @@ videoanalysis analyze large_video.mp4 -m 30 -s 120
 *Times vary based on analysis type, frame count, and system specs.*
 
 ---
+
+<img width="1536" height="673" alt="image" src="https://github.com/user-attachments/assets/39ac2909-30f0-4c0c-bb41-fab471bab3d6" />
+
 
 ## Contributing
 
