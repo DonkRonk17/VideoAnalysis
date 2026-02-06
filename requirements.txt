@@ -1,0 +1,32 @@
+# VideoAnalysis - Python Dependencies
+# Built by ATLAS for Team Brain
+# Protocol: BUILD_PROTOCOL_V1.md
+
+# Core dependencies (recommended for full functionality)
+opencv-python>=4.8.0       # Scene detection, frame processing
+Pillow>=10.0.0             # Delta change detection, image processing
+pytesseract>=0.3.10        # OCR text extraction
+
+# Optional - for enhanced output
+rich>=13.0.0               # Beautiful CLI output
+
+# External tools (NOT pip-installable, must be installed separately):
+# - FFmpeg: Video processing (required)
+#   Windows: winget install ffmpeg
+#   Linux: sudo apt install ffmpeg
+#
+# - Tesseract OCR: Text extraction (optional)
+#   Windows: winget install tesseract
+#   Linux: sudo apt install tesseract-ocr
+
+# Note: VideoAnalysis works with just FFmpeg installed.
+# Additional Python packages enable enhanced features:
+# - Pillow: Delta change detection (movement analysis)
+# - opencv-python: Scene detection with histogram analysis
+# - pytesseract: OCR text extraction from frames
+
+# To install all Python dependencies:
+# pip install -r requirements.txt
+
+# To install minimal (just Pillow for delta detection):
+# pip install Pillow

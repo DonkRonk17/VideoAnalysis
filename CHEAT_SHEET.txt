@@ -1,0 +1,273 @@
+================================================================================
+                       VIDEOANALYSIS CHEAT SHEET
+                Enable AI Agents to "Watch" Video Content
+================================================================================
+
+Built by ATLAS (Team Brain) | For Logan Smith / Metaphy LLC
+GitHub: https://github.com/DonkRonk17/VideoAnalysis
+
+================================================================================
+QUICK START
+--------------------------------------------------------------------------------
+
+1. Install FFmpeg:
+   Windows:  winget install ffmpeg
+   Linux:    sudo apt install ffmpeg
+
+2. Verify:
+   videoanalysis check-deps
+
+3. Run analysis:
+   videoanalysis analyze video.mp4
+
+================================================================================
+CLI COMMANDS
+--------------------------------------------------------------------------------
+
+Full Analysis:
+  videoanalysis analyze video.mp4
+  videoanalysis analyze video.mp4 --type quick
+  videoanalysis analyze video.mp4 --type comprehensive
+  videoanalysis analyze video.mp4 -o results.json
+
+Delta / Movement Detection:
+  videoanalysis delta video.mp4
+  videoanalysis delta video.mp4 --key-moments 10
+  videoanalysis delta video.mp4 --key-moments 10 --timeline
+  videoanalysis delta video.mp4 --threshold 20 -o delta.json
+
+Frame Extraction:
+  videoanalysis frames video.mp4 -o ./frames/
+  videoanalysis frames video.mp4 -o ./frames/ -i 30
+  videoanalysis frames video.mp4 -o ./frames/ --max-frames 50
+
+Scene Detection:
+  videoanalysis scenes video.mp4
+  videoanalysis scenes video.mp4 --threshold 0.3
+  videoanalysis scenes video.mp4 -o scenes.json
+
+OCR Text Extraction:
+  videoanalysis ocr video.mp4 --timestamps "00:05:00,00:10:00"
+  videoanalysis ocr video.mp4 --timestamps "00:01:00" -o text.json
+
+Check Dependencies:
+  videoanalysis check-deps
+
+================================================================================
+ANALYSIS TYPES
+--------------------------------------------------------------------------------
+
+comprehensive  - Full analysis: frames + scenes + OCR + delta (default)
+quick          - Faster pass: fewer frames, basic analysis
+frames_only    - Extract and analyze frames only
+ocr_only       - OCR text extraction only
+delta_only     - Movement / delta change detection only
+
+================================================================================
+KEY OPTIONS (FLAGS)
+--------------------------------------------------------------------------------
+
+Global Options:
+  -h, --help           Show help message
+  --version            Show version
+  -v, --verbose        Verbose output
+
+Analyze Command:
+  -o, --output FILE    Save results to JSON file
+  -s, --sample-rate N  Seconds between frames (default: 30)
+  -m, --max-frames N   Maximum frames to extract (default: 100)
+  -t, --type TYPE      Analysis type (see above)
+  --delta-threshold N  Movement threshold 0-255 (default: 15)
+  --scene-threshold N  Scene change sensitivity 0.0-1.0 (default: 0.3)
+  --ocr-confidence N   OCR confidence filter 0.0-1.0 (default: 0.6)
+  --no-cleanup         Keep temporary extracted frames
+
+Frames Command:
+  -o, --output-dir DIR Output directory for frames
+  -i, --interval N     Seconds between frames (default: 30)
+  --max-frames N       Maximum frames to extract (default: 100)
+
+Delta Command:
+  -i, --interval N     Seconds between frames (default: 5)
+  -k, --key-moments N  Number of key moments to find (default: 5)
+  --threshold N        Delta threshold 0-255 (default: 15)
+  --timeline           Include activity timeline
+  -o, --output FILE    Save results to JSON
+
+Scenes Command:
+  --threshold N        Scene detection threshold 0.0-1.0 (default: 0.3)
+  -o, --output FILE    Save results to JSON
+
+================================================================================
+DELTA CHANGE DETECTION (Logan's Key Insight)
+--------------------------------------------------------------------------------
+
+"Don't forget about using just delta change to see movement"
+  - Simple frame differencing detects visual changes
+  - No complex ML/CV required for basic motion detection
+  - Efficient, fast, and reliable
+
+Change Types:
+  scene_change      - Major visual shift (delta > 50)
+  major_movement    - Significant activity (delta 30-50)
+  moderate_movement - Noticeable change (delta 15-30)
+  minor_movement    - Subtle change (delta < 15)
+
+Activity Levels (Timeline):
+  high   - Heavy movement/activity (avg delta > 30)
+  medium - Moderate activity (avg delta 15-30)
+  low    - Light activity (avg delta 5-15)
+  static - Almost no change (avg delta < 5)
+
+================================================================================
+PYTHON API
+--------------------------------------------------------------------------------
+
+Import:
+  from videoanalysis import VideoAnalyzer
+
+Basic Usage:
+  analyzer = VideoAnalyzer()
+  result = analyzer.analyze("video.mp4")
+  print(result.duration)
+  print(result.summary)
+
+Custom Settings:
+  analyzer = VideoAnalyzer(
+      sample_interval=15,
+      max_frames=200,
+      delta_threshold=10.0,
+      scene_threshold=0.25,
+      ocr_confidence=0.7
+  )
+  result = analyzer.analyze("video.mp4", analysis_type="comprehensive")
+
+Individual Components:
+  from videoanalysis import DependencyChecker, FrameSampler
+  from videoanalysis import SceneDetector, DeltaChangeDetector, OCREngine
+
+  # Check deps
+  status = DependencyChecker.check_all()
+
+  # Extract frames
+  sampler = FrameSampler(Path("./frames"))
+  frames = sampler.sample("video.mp4", interval_seconds=10)
+
+  # Detect scenes
+  detector = SceneDetector(threshold=0.3)
+  scenes = detector.detect("video.mp4")
+
+  # Delta detection
+  delta = DeltaChangeDetector(threshold=15.0)
+  changes = delta.detect_changes(frames)
+  moments = delta.find_key_moments(frames, top_n=10)
+  timeline = delta.get_activity_timeline(frames, bucket_size=5)
+
+  # OCR
+  ocr = OCREngine(languages=['eng'])
+  texts = ocr.extract_from_frames(frames)
+
+Result Object:
+  result.file_path           # Source file path
+  result.file_name           # Source file name
+  result.duration            # Duration formatted (HH:MM:SS)
+  result.resolution          # (width, height) tuple
+  result.fps                 # Frames per second
+  result.format_name         # Container format
+  result.codec               # Video codec
+  result.file_size_mb        # File size in MB
+  result.scenes              # List[Scene]
+  result.frames              # List[FrameAnalysis]
+  result.text_detected       # List[TextOccurrence]
+  result.delta_changes       # List[DeltaChange]
+  result.key_moments         # List[DeltaChange]
+  result.activity_timeline   # List[ActivityBucket]
+  result.summary             # Generated summary text
+  result.processing_time_seconds  # Processing duration
+
+================================================================================
+SUPPORTED FORMATS
+--------------------------------------------------------------------------------
+
+Video:  MP4, MOV, AVI, MKV, WebM, WMV, FLV, M4V, MPG, MPEG
+Note:   Any format FFmpeg can decode is supported
+
+================================================================================
+DEPENDENCIES
+--------------------------------------------------------------------------------
+
+Required:
+  FFmpeg           Video processing engine
+    Windows:       winget install ffmpeg
+    Linux:         sudo apt install ffmpeg
+
+Optional:
+  Tesseract        OCR text extraction
+    Windows:       winget install tesseract
+    Linux:         sudo apt install tesseract-ocr
+
+  opencv-python    Advanced frame analysis
+    Install:       pip install opencv-python
+
+  Pillow           Image processing
+    Install:       pip install Pillow
+
+  pytesseract      Python Tesseract bindings
+    Install:       pip install pytesseract
+
+================================================================================
+ERROR HANDLING
+--------------------------------------------------------------------------------
+
+Error: "FFmpeg not found"
+  -> Install FFmpeg: winget install ffmpeg (Windows)
+  -> Verify: ffmpeg -version
+
+Error: "Video file not found"
+  -> Check path is correct, use absolute paths
+  -> Verify file exists and is accessible
+
+Error: "Unsupported format"
+  -> Check file is a valid video format
+  -> Try converting: ffmpeg -i input.xyz output.mp4
+
+Error: "Processing failed"
+  -> Check video is not corrupted
+  -> Try with --verbose for detailed error info
+  -> Reduce --max-frames if running out of memory
+
+================================================================================
+INTEGRATION WITH TEAM BRAIN TOOLS
+--------------------------------------------------------------------------------
+
+With SynapseLink:
+  from synapselink import quick_send
+  result = analyzer.analyze("video.mp4")
+  quick_send("TEAM", "Video Analysis Complete", result.summary)
+
+With AgentHealth:
+  from agenthealth import AgentHealth
+  health = AgentHealth()
+  health.heartbeat("ATLAS", status="analyzing_video")
+
+With SessionReplay:
+  from sessionreplay import SessionReplay
+  replay = SessionReplay()
+  replay.log_input(session_id, "Analyzing video: video.mp4")
+
+================================================================================
+RESOURCES
+--------------------------------------------------------------------------------
+
+Documentation:   AutoProjects/VideoAnalysis/README.md
+Examples:        AutoProjects/VideoAnalysis/EXAMPLES.md
+Integration:     AutoProjects/VideoAnalysis/INTEGRATION_PLAN.md
+Quick Starts:    AutoProjects/VideoAnalysis/QUICK_START_GUIDES.md
+GitHub:          https://github.com/DonkRonk17/VideoAnalysis
+Issues:          https://github.com/DonkRonk17/VideoAnalysis/issues
+
+================================================================================
+Built by ATLAS (Team Brain) | Requested by WSL_CLIO
+Delta Change Detection concept by Logan Smith
+Together for all time!
+================================================================================
